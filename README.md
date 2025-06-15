@@ -14,7 +14,7 @@ It creates a virtual MIDI device on your Mac, listens for commands from your Tan
 
 ### 1. Create the Project Structure
 
-Create a new folder for the project. Inside that folder, you must create the following file structure and copy the code into the files:
+Create a new folder for the project. Inside that folder, you must create the following file structure:
 
 - `Package.swift` (file)
 - `Sources/` (folder)
