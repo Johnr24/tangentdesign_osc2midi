@@ -22,6 +22,25 @@ struct MidiMapping {
     let inMax: Float?
     let outMin: UInt8?
     let outMax: UInt8?
+
+    // Initializer with default values for optional properties to allow for cleaner mapping definitions.
+    init(
+        type: MappingType,
+        channel: UInt8,
+        control: UInt8,
+        inMin: Float? = nil,
+        inMax: Float? = nil,
+        outMin: UInt8? = nil,
+        outMax: UInt8? = nil
+    ) {
+        self.type = type
+        self.channel = channel
+        self.control = control
+        self.inMin = inMin
+        self.inMax = inMax
+        self.outMin = outMin
+        self.outMax = outMax
+    }
 }
 
 // This is the main dictionary you will edit to customize your controls.
@@ -105,7 +124,8 @@ guard midiManager != nil else {
 // Set up the OSC Server using OSCKit
 let oscServer = OSCServer(
     port: OSC_PORT,
-    dispatchQueue: .global(qos: .background), // Process OSC on a background thread
+    receiveQueue: .global(qos: .background),
+    dispatchQueue: .global(qos: .background),
     handler: { message, _ in
         
         let address = message.addressPattern.string
