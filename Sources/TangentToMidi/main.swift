@@ -124,11 +124,10 @@ guard midiManager != nil else {
 // Set up the OSC Server using OSCKit
 let oscServer = OSCServer(
     port: OSC_PORT,
-    receiveQueue: .global(qos: .background),
-    dispatchQueue: .global(qos: .background),
+    receiveQueue: DispatchQueue.global(qos: .background),
     handler: { message, _ in
         
-        let address = message.addressPattern.string
+        let address = message.addressPattern.stringValue
         let arguments = message.values
         
         guard let mapping = MIDI_MAPPINGS[address] else {
