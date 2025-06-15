@@ -176,8 +176,21 @@ let oscServer = OSCServer(
 
         switch mapping.type {
         case .noteOnOff:
-            guard let value = arguments.first as? Float32, (value == 0.0 || value == 1.0) else { return }
-            if value == 1.0 {
+            var isOn: Bool? = nil
+            if let floatValue = arguments.first as? Float32 {
+                if floatValue == 1.0 { isOn = true }
+                else if floatValue == 0.0 { isOn = false }
+            } else if let intValue = arguments.first as? Int32 {
+                if intValue == 1 { isOn = true }
+                else if intValue == 0 { isOn = false }
+            }
+
+            guard let noteState = isOn else {
+                print("  -> OSC for noteOnOff (\(mapping.oscAddress)): argument not 0 or 1. Value: \(String(describing: arguments.first))")
+                return
+            }
+
+            if noteState {
                 // Note On: 0x90 | channel, note, velocity
                 midiMessage = [0x90 | mapping.channel, mapping.control, 127]
             } else {
@@ -186,25 +199,58 @@ let oscServer = OSCServer(
             }
 
         case .ccAbsolute:
-            guard let oscValue = arguments.first as? Float32,
-                  let valueMap = mapping.valueMap else { return }
+            var floatOscValue: Float?
+            if let val = arguments.first as? Float32 {
+                floatOscValue = val
+            } else if let val = arguments.first as? Int32 {
+                floatOscValue = Float(val)
+            }
+
+            guard let oscValue = floatOscValue,
+                  let valueMap = mapping.valueMap else {
+                print("  -> OSC for ccAbsolute (\(mapping.oscAddress)): argument not a valid number or no valueMap. Value: \(String(describing: arguments.first))")
+                return
+            }
             
-            let inSpan = valueMap.inMax - valueMap.inMin
-            let outSpan = Float(valueMap.outMax - valueMap.outMin)
-            let scaledValue = ((Float(oscValue) - valueMap.inMin) / inSpan) * outSpan + Float(valueMap.outMin)
-            let midiValue = UInt8(max(Float(valueMap.outMin), min(Float(valueMap.outMax), scaledValue.rounded())))
+            var finalMidiValue: UInt8
+            if valueMap.inMin == valueMap.inMax {
+                // print("  -> OSC for ccAbsolute (\(mapping.oscAddress)): inMin (\(valueMap.inMin)) and inMax (\(valueMap.inMax)) are the same. Clamping output based on comparison to inMin.")
+                if oscValue <= valueMap.inMin {
+                    finalMidiValue = valueMap.outMin
+                } else {
+                    finalMidiValue = valueMap.outMax
+                }
+            } else {
+                let inSpan = valueMap.inMax - valueMap.inMin // Guaranteed non-zero by the check above
+                let outSpan = Float(valueMap.outMax - valueMap.outMin)
+                
+                // Scale the OSC value to the MIDI output range.
+                let scaledValue = ((oscValue - valueMap.inMin) / inSpan) * outSpan + Float(valueMap.outMin)
+                
+                // Clamp the result to the defined MIDI output range (outMin/outMax).
+                finalMidiValue = UInt8(max(Float(valueMap.outMin), min(Float(valueMap.outMax), scaledValue.rounded())))
+            }
             
-            midiMessage = [0xB0 | mapping.channel, mapping.control, midiValue]
+            midiMessage = [0xB0 | mapping.channel, mapping.control, finalMidiValue]
 
         case .ccRelative:
-            guard let delta32 = arguments.first as? Int32 else { return }
-            let delta = Int(delta32)
+            var delta: Int?
+            if let intVal = arguments.first as? Int32 {
+                delta = Int(intVal)
+            } else if let floatVal = arguments.first as? Float32 {
+                delta = Int(floatVal.rounded()) // Round float to nearest integer for delta
+            }
+
+            guard let actualDelta = delta else {
+                print("  -> OSC for ccRelative (\(mapping.oscAddress)): argument not a valid integer or float. Value: \(String(describing: arguments.first))")
+                return
+            }
             
-            let currentValue = ccValues[mapping.control, default: 64]
-            var newValue = Int(currentValue) + delta
-            newValue = max(0, min(127, newValue))
+            let currentValue = ccValues[mapping.control, default: 64] // Default to middle value (64)
+            var newValue = Int(currentValue) + actualDelta
+            newValue = max(0, min(127, newValue)) // Clamp to MIDI range 0-127
             let newMidiValue = UInt8(newValue)
-            ccValues[mapping.control] = newMidiValue
+            ccValues[mapping.control] = newMidiValue // Store the new state for this control
             
             midiMessage = [0xB0 | mapping.channel, mapping.control, newMidiValue]
         }
