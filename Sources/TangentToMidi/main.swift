@@ -146,6 +146,14 @@ func handleOSCMessage(address: String, arguments: [Any]) {
     }
 }
 
+// --- OSC Server Delegate ---
+// This class handles incoming OSC messages, conforming to the new library's API.
+class OSCHandler: OSCServerDelegate {
+    func didReceive(_ message: OSCMessage) {
+        handleOSCMessage(address: message.address.string, arguments: message.arguments)
+    }
+}
+
 
 // --- Main Application ---
 
@@ -159,13 +167,12 @@ guard midiManager != nil else {
     exit(1)
 }
 
+// Set up the OSC Server using the delegate pattern
 let server = OSCServer(address: "", port: OSC_PORT)
-server.setHandler(for: "*") { (message: OSCMessage) in
-    handleOSCMessage(address: message.address.string, arguments: message.arguments)
-}
+server.delegate = OSCHandler()
+server.start()
 
 print("Listening for OSC messages on port \(OSC_PORT)")
-server.start()
 print("Application started. Press Ctrl+C to exit.")
 
 // Keep the application running until it's terminated (e.g., with Ctrl+C)
