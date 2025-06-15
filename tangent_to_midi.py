@@ -3,8 +3,8 @@
 import mido
 import time
 import threading
-from python_osc import dispatcher
-from python_osc import osc_server
+from pythonosc import dispatcher
+from pythonosc import osc_server
 
 
 # --- CONFIGURATION ---
