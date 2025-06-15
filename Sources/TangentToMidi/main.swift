@@ -241,18 +241,21 @@ let oscServer = OSCServer(
                 delta = Int(floatVal.rounded()) // Round float to nearest integer for delta
             }
 
-            guard let actualDelta = delta else {
+            guard var actualDelta = delta else { // Made actualDelta mutable
                 print("  -> OSC for ccRelative (\(mapping.oscAddress)): argument not a valid integer or float. Value: \(String(describing: arguments.first))")
                 return
             }
             
-            let currentValue = ccValues[mapping.control, default: 64] // Default to middle value (64)
-            var newValue = Int(currentValue) + actualDelta
-            newValue = max(0, min(127, newValue)) // Clamp to MIDI range 0-127
-            let newMidiValue = UInt8(newValue)
-            ccValues[mapping.control] = newMidiValue // Store the new state for this control
+            // For true relative MIDI CCs (offset binary: 64 is no change):
+            // Clamp the delta: min value for delta is -64 (yields MIDI value 0), max is +63 (yields MIDI value 127).
+            actualDelta = max(-64, min(63, actualDelta))
             
-            midiMessage = [0xB0 | mapping.channel, mapping.control, newMidiValue]
+            let relativeMidiValue = UInt8(64 + actualDelta)
+            
+            // The ccValues state map is not used for this style of relative CC,
+            // as the state is maintained by the receiving software.
+            
+            midiMessage = [0xB0 | mapping.channel, mapping.control, relativeMidiValue]
         }
 
         if !midiMessage.isEmpty {
