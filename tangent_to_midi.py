@@ -131,6 +131,13 @@ def osc_handler(address, *args):
 def main():
     global midi_out_port
 
+    # Explicitly set the Mido backend to pygame, as it has better cross-platform
+    # support and avoids compilation issues seen with python-rtmidi on some systems.
+    try:
+        mido.set_backend('mido.backends.pygame')
+    except Exception as e:
+        print(f"Warning: Could not set mido backend to pygame. Will use default. Error: {e}")
+
     print("--- Tangent to MIDI Bridge ---")
 
     # Create a virtual MIDI output port
@@ -139,7 +146,7 @@ def main():
         print(f"Successfully created virtual MIDI port: '{MIDI_PORT_NAME}'")
     except Exception as e:
         print(f"Error: Could not create virtual MIDI port. Is a MIDI backend installed?")
-        print(f"Try: pip install python-rtmidi")
+        print(f"Try: pip install pygame")
         print(f"Details: {e}")
         return
 
