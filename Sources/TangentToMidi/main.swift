@@ -53,7 +53,7 @@ struct MidiMapping: Decodable {
 }
 
 // --- GLOBAL STATE ---
-var ccValues: [UInt8: UInt8] = [:] // [control: value]
+// ccValues was used for a previous implementation of relative CCs and is no longer needed.
 
 // --- MIDI MANAGER ---
 class MIDIManager {
@@ -250,7 +250,10 @@ let oscServer = OSCServer(
             // Clamp the delta: min value for delta is -64 (yields MIDI value 0), max is +63 (yields MIDI value 127).
             actualDelta = max(-64, min(63, actualDelta))
             
-            let relativeMidiValue = UInt8(64 + actualDelta)
+            // Invert the delta to match the MIDI software's interpretation:
+            // If clockwise OSC delta is +1, MIDI should be 63 (interpreted as "forward" by user's software).
+            // If anti-clockwise OSC delta is -1, MIDI should be 65 (interpreted as "backward" by user's software).
+            let relativeMidiValue = UInt8(64 - actualDelta) 
             
             // The ccValues state map is not used for this style of relative CC,
             // as the state is maintained by the receiving software.
