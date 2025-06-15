@@ -20,19 +20,12 @@ mappings:
   - osc_address: "/tangent/bt/A/press"
     type: "note_on_off"
     channel: 0
-    control: 60
-
-  - osc_address: "/tangent/kn/A/delta"
+    control: 1
+  - osc_address: "/1/fader1"
     type: "cc_relative"
     channel: 0
-    control: 20
-
-  - osc_address: "/tangent/wh/A/delta"
-    type: "cc_relative"
-    channel: 0
-    control: 21
-
-  - osc_address: "/tangent/sl/A/value"
+    control: 61
+  - osc_address: "/tk1/ring/"
     type: "cc_absolute"
     channel: 0
     control: 22
