@@ -125,7 +125,7 @@ guard midiManager != nil else {
 let oscServer = OSCServer(
     port: OSC_PORT,
     receiveQueue: DispatchQueue.global(qos: .background),
-    handler: { message, _ in
+    handler: { message, _, _, _ in
         
         let address = message.addressPattern.stringValue
         let arguments = message.values
