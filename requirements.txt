@@ -1,3 +1,0 @@
-mido
-python-portmidi
-python-osc
