@@ -1,0 +1,4 @@
+
+**Example 2: Mapping an EQ Knob**
+Map `/tangent/kn/C/delta` to MIDI CC #25.
+
