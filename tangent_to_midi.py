@@ -3,8 +3,8 @@
 import mido
 import time
 import threading
-import pythonosc
-import pygame
+from python_osc import dispatcher
+from python_osc import osc_server
 
 
 # --- CONFIGURATION ---
@@ -132,12 +132,13 @@ def osc_handler(address, *args):
 def main():
     global midi_out_port
 
-    # Explicitly set the Mido backend to pygame, as it has better cross-platform
-    # support and avoids compilation issues seen with python-rtmidi on some systems.
+    # Explicitly set the Mido backend to portmidi.
+    # This backend supports virtual ports on macOS, but requires the
+    # PortMidi library to be installed on the system.
     try:
-        mido.set_backend('mido.backends.pygame')
+        mido.set_backend('mido.backends.portmidi')
     except Exception as e:
-        print(f"Warning: Could not set mido backend to pygame. Will use default. Error: {e}")
+        print(f"Warning: Could not set mido backend to portmidi. Will use default. Error: {e}")
 
     print("--- Tangent to MIDI Bridge ---")
 
@@ -147,7 +148,9 @@ def main():
         print(f"Successfully created virtual MIDI port: '{MIDI_PORT_NAME}'")
     except Exception as e:
         print(f"Error: Could not create virtual MIDI port. Is a MIDI backend installed?")
-        print(f"Try: pip install pygame")
+        print(f"On macOS, this requires the PortMidi library.")
+        print(f"Try installing it with Homebrew: 'brew install portmidi'")
+        print(f"Then reinstall the python wrapper: 'pip install --force-reinstall python-portmidi'")
         print(f"Details: {e}")
         return
 

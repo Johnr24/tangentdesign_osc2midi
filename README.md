@@ -19,6 +19,7 @@ It creates a virtual MIDI device on your Mac, listens for commands from your Tan
 - A Mac running macOS.
 - Python 3 installed. You can check by running `python3 --version` in your Terminal. If not installed, you can install it from [python.org](https://www.python.org/downloads/) or using [Homebrew](https://brew.sh/) (`brew install python`).
 - A Tangent Elements controller (or any other device that can send OSC messages).
+- [Homebrew](https://brew.sh/) for installing system libraries.
 
 ## Setup Instructions
 
@@ -28,7 +29,8 @@ Download the files from this project into a new folder on your computer:
 - `tangent_to_midi.py`
 - `requirements.txt`
 
-### 2. Install Dependencies
+### 2. Install System Dependencies (macOS)
 
-Open the Terminal app on your Mac, navigate to the folder where you saved the files, and run the following command to install the necessary Python libraries:
+This application uses the **PortMidi** library to create a virtual MIDI device. You must install it first using Homebrew.
 
+In your Terminal, run:
