@@ -25,24 +25,3 @@ Create a new folder for the project. Inside that folder, you must create the fol
 
 Open the Terminal app, navigate to the root of your project folder (the one containing `Package.swift`), and run the build command:
 
-
-This will download the necessary dependencies (like SwiftOSC) and compile the application. The first build might take a minute. The final executable will be placed in the `.build/debug/` directory.
-
-### 3. Configure Your Tangent Controller
-
-You need to configure your Tangent controller to send OSC messages to your computer's IP address.
-
-1.  **Find your Mac's IP Address**: Go to `System Settings` > `Wi-Fi` (or `Ethernet`), click on the `Details...` button for your active network connection, and find your IP Address under the `TCP/IP` tab. It will look something like `192.168.1.100`.
-2.  **Configure Tangent Mapper**:
-    - Open the Tangent Mapper application.
-    - Go to the "Configuration" tab.
-    - Set the protocol to **OSC**.
-    - Set the **Host** to your Mac's IP address.
-    - Set the **Port** to `9000` (or whatever you configure in `main.swift`).
-    - Make sure the controller is active and sending data.
-
-### 4. Run the Bridge Application
-
-In the same Terminal window (still in the project's root folder), you can run the application using the Swift command:
-
-Alternatively, you can run the compiled executable directly:
