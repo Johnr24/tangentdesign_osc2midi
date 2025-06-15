@@ -84,14 +84,29 @@ class MIDIManager {
 
     func send(bytes: [UInt8]) {
         guard !bytes.isEmpty else { return }
-        var packet = MIDIPacket()
-        packet.timeStamp = 0
-        packet.length = UInt16(bytes.count)
-        withUnsafeMutableBytes(of: &packet.data) {
-            $0.copyBytes(from: bytes)
+
+        // Use a buffer to construct the MIDIPacketList in the format CoreMIDI expects.
+        // This is the recommended way to handle variable-size C structs in Swift.
+        var buffer = [UInt8](repeating: 0, count: 1024)
+        
+        buffer.withUnsafeMutableBufferPointer { bufferPtr in
+            guard let baseAddress = bufferPtr.baseAddress else { return }
+            
+            let packetList = UnsafeMutablePointer<MIDIPacketList>(OpaquePointer(baseAddress))
+            
+            var currentPacket = MIDIPacketListInit(packetList)
+            
+            currentPacket = MIDIPacketListAdd(
+                packetList,
+                bufferPtr.count,
+                currentPacket,
+                0, // timestamp (0 = now)
+                bytes.count,
+                bytes
+            )
+            
+            MIDIReceived(source, packetList)
         }
-        var packetList = MIDIPacketList(numPackets: 1, packet: packet)
-        MIDIReceived(source, &packetList)
     }
 }
 
