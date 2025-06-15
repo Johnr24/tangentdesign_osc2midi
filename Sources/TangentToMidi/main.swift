@@ -1,11 +1,11 @@
 import Foundation
 import CoreMIDI
-import SwiftOSC
+import OSCKit
 
 // --- CONFIGURATION ---
 
 let MIDI_PORT_NAME = "Tangent Elements Bridge (Swift)"
-let OSC_PORT = 9000
+let OSC_PORT: UInt16 = 9000
 
 // --- MIDI MAPPING ---
 struct MidiMapping {
@@ -90,71 +90,6 @@ class MIDIManager {
     }
 }
 
-// --- OSC to MIDI Translator ---
-// This function is called for every incoming OSC message.
-func handleOSCMessage(address: String, arguments: [Any]) {
-    guard let mapping = MIDI_MAPPINGS[address] else {
-        print("Received unmapped OSC: \(address) \(arguments)")
-        return
-    }
-    
-    print("Received OSC: \(address) \(arguments)")
-
-    var midiMessage: [UInt8] = []
-
-    switch mapping.type {
-    case .noteOnOff:
-        guard let value = arguments.first as? Float, (value == 0.0 || value == 1.0) else { return }
-        let velocity: UInt8 = (value == 1.0) ? 127 : 0
-        // Note On message: 0x90 | channel, note, velocity
-        midiMessage = [0x90 | mapping.channel, mapping.control, velocity]
-
-    case .ccAbsolute:
-        guard let oscValue = arguments.first as? Float,
-              let inMin = mapping.inMin, let inMax = mapping.inMax,
-              let outMin = mapping.outMin, let outMax = mapping.outMax else { return }
-        
-        // Scale value from OSC range (e.g., 0.0-1.0) to MIDI range (0-127)
-        let inSpan = inMax - inMin
-        let outSpan = Float(outMax - outMin)
-        let scaledValue = ((oscValue - inMin) / inSpan) * outSpan + Float(outMin)
-        let midiValue = UInt8(max(Float(outMin), min(Float(outMax), scaledValue.rounded())))
-        
-        // Control Change message: 0xB0 | channel, control, value
-        midiMessage = [0xB0 | mapping.channel, mapping.control, midiValue]
-
-    case .ccRelative:
-        guard let delta = arguments.first as? Int else { return }
-        
-        // Get current value, default to 64 (center)
-        let currentValue = ccValues[mapping.control, default: 64]
-        
-        // Calculate new value and clamp between 0-127
-        var newValue = Int(currentValue) + delta
-        newValue = max(0, min(127, newValue))
-        
-        let newMidiValue = UInt8(newValue)
-        ccValues[mapping.control] = newMidiValue
-        
-        // Control Change message: 0xB0 | channel, control, value
-        midiMessage = [0xB0 | mapping.channel, mapping.control, newMidiValue]
-    }
-
-    if !midiMessage.isEmpty {
-        print("  -> Sending MIDI: \(midiMessage.map { String(format: "0x%02X", $0) }.joined(separator: " "))")
-        midiManager?.send(bytes: midiMessage)
-    }
-}
-
-// --- OSC Server Delegate ---
-// This class handles incoming OSC messages, conforming to the new library's API.
-class OSCHandler: OSCServerDelegate {
-    func didReceive(_ message: OSCMessage) {
-        handleOSCMessage(address: message.address.string, arguments: message.arguments)
-    }
-}
-
-
 // --- Main Application ---
 
 print("--- Tangent to MIDI Bridge (Swift) ---")
@@ -167,12 +102,78 @@ guard midiManager != nil else {
     exit(1)
 }
 
-// Set up the OSC Server using the delegate pattern
-let server = OSCServer(address: "", port: OSC_PORT)
-server.delegate = OSCHandler()
-server.start()
+// Set up the OSC Server using OSCKit
+let oscServer = OSCServer(
+    port: OSC_PORT,
+    dispatchQueue: .global(qos: .background), // Process OSC on a background thread
+    handler: { message, _ in
+        
+        let address = message.addressPattern.string
+        let arguments = message.values
+        
+        guard let mapping = MIDI_MAPPINGS[address] else {
+            print("Received unmapped OSC: \(address) \(arguments)")
+            return
+        }
+        
+        print("Received OSC: \(address) \(arguments)")
 
-print("Listening for OSC messages on port \(OSC_PORT)")
+        var midiMessage: [UInt8] = []
+
+        switch mapping.type {
+        case .noteOnOff:
+            guard let value = arguments.first as? Float32, (value == 0.0 || value == 1.0) else { return }
+            let velocity: UInt8 = (value == 1.0) ? 127 : 0
+            // Note On message: 0x90 | channel, note, velocity
+            midiMessage = [0x90 | mapping.channel, mapping.control, velocity]
+
+        case .ccAbsolute:
+            guard let oscValue = arguments.first as? Float32,
+                  let inMin = mapping.inMin, let inMax = mapping.inMax,
+                  let outMin = mapping.outMin, let outMax = mapping.outMax else { return }
+            
+            // Scale value from OSC range (e.g., 0.0-1.0) to MIDI range (0-127)
+            let inSpan = inMax - inMin
+            let outSpan = Float(outMax - outMin)
+            let scaledValue = ((Float(oscValue) - inMin) / inSpan) * outSpan + Float(outMin)
+            let midiValue = UInt8(max(Float(outMin), min(Float(outMax), scaledValue.rounded())))
+            
+            // Control Change message: 0xB0 | channel, control, value
+            midiMessage = [0xB0 | mapping.channel, mapping.control, midiValue]
+
+        case .ccRelative:
+            guard let delta32 = arguments.first as? Int32 else { return }
+            let delta = Int(delta32)
+            
+            // Get current value, default to 64 (center)
+            let currentValue = ccValues[mapping.control, default: 64]
+            
+            // Calculate new value and clamp between 0-127
+            var newValue = Int(currentValue) + delta
+            newValue = max(0, min(127, newValue))
+            
+            let newMidiValue = UInt8(newValue)
+            ccValues[mapping.control] = newMidiValue
+            
+            // Control Change message: 0xB0 | channel, control, value
+            midiMessage = [0xB0 | mapping.channel, mapping.control, newMidiValue]
+        }
+
+        if !midiMessage.isEmpty {
+            print("  -> Sending MIDI: \(midiMessage.map { String(format: "0x%02X", $0) }.joined(separator: " "))")
+            midiManager?.send(bytes: midiMessage)
+        }
+    }
+)
+
+do {
+    try oscServer.start()
+    print("Listening for OSC messages on port \(OSC_PORT)")
+} catch {
+    print("Error: Could not start OSC Server. \(error.localizedDescription)")
+    exit(1)
+}
+
 print("Application started. Press Ctrl+C to exit.")
 
 // Keep the application running until it's terminated (e.g., with Ctrl+C)
