@@ -177,8 +177,13 @@ let oscServer = OSCServer(
         switch mapping.type {
         case .noteOnOff:
             guard let value = arguments.first as? Float32, (value == 0.0 || value == 1.0) else { return }
-            let velocity: UInt8 = (value == 1.0) ? 127 : 0
-            midiMessage = [0x90 | mapping.channel, mapping.control, velocity]
+            if value == 1.0 {
+                // Note On: 0x90 | channel, note, velocity
+                midiMessage = [0x90 | mapping.channel, mapping.control, 127]
+            } else {
+                // Note Off: 0x80 | channel, note, velocity (0)
+                midiMessage = [0x80 | mapping.channel, mapping.control, 0]
+            }
 
         case .ccAbsolute:
             guard let oscValue = arguments.first as? Float32,
