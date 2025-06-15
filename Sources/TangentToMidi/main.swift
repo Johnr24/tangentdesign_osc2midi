@@ -250,10 +250,15 @@ let oscServer = OSCServer(
             // Clamp the delta: min value for delta is -64 (yields MIDI value 0), max is +63 (yields MIDI value 127).
             actualDelta = max(-64, min(63, actualDelta))
             
-            // Invert the delta to match the MIDI software's interpretation:
-            // If clockwise OSC delta is +1, MIDI should be 63 (interpreted as "forward" by user's software).
-            // If anti-clockwise OSC delta is -1, MIDI should be 65 (interpreted as "backward" by user's software).
-            let relativeMidiValue = UInt8(64 - actualDelta) 
+            // Standard relative MIDI CC calculation (64 +/- delta).
+            // Based on user observation, their MIDI software interprets:
+            //   - MIDI 63 as "forward".
+            //   - MIDI 65 as "backward".
+            // Therefore, with `64 + actualDelta`:
+            //   - Anti-clockwise (OSC delta -1) sends MIDI 63, resulting in "forward".
+            //   - Clockwise (OSC delta +1) sends MIDI 65, resulting in "backward".
+            // This matches the desired control direction.
+            let relativeMidiValue = UInt8(64 + actualDelta)
             
             // The ccValues state map is not used for this style of relative CC,
             // as the state is maintained by the receiving software.
