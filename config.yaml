@@ -1,32 +1,143 @@
-# MIDI Mappings for Tangent to MIDI Bridge
-#
-# Each item in this list defines a mapping from an OSC address to a MIDI message.
-#
-# Properties:
-#   osc_address: The OSC path from your controller (e.g., "/tangent/bt/A/press").
-#   type: The type of MIDI message to send.
-#         - "note_on_off": For buttons. Sends a Note On message. The OSC value should be a float (0.0 for off, 1.0 for on).
-#         - "cc_relative": For rotary encoders. Sends a Control Change message, accumulating the value. The OSC value should be an integer delta.
-#         - "cc_absolute": For faders/sliders. Sends a Control Change message with a scaled value. The OSC value should be a float.
-#   channel: The MIDI channel (0-15).
-#   control: The MIDI note number (for "note_on_off") or CC number (for "cc_..." types), from 0-127.
-#   value_map: (Required for "cc_absolute" type only)
-#     in_min: The minimum value from the OSC controller (e.g., 0.0).
-#     in_max: The maximum value from the OSC controller (e.g., 1.0).
-#     out_min: The minimum MIDI value to map to (e.g., 0).
-#     out_max: The maximum MIDI value to map to (e.g., 127).
 
 mappings:
-  - osc_address: "/tangent/bt/A/press"
+  - osc_address: "/1/button1"
     type: "note_on_off"
     channel: 0
     control: 1
-  - osc_address: "/1/fader1"
+  - osc_address: "/1/button2"
+    type: "note_on_off"
+    channel: 0
+    control: 2
+  - osc_address: "/1/button3"
+    type: "note_on_off"
+    channel: 0
+    control: 3
+  - osc_address: "/1/button4"
+    type: "note_on_off"
+    channel: 0
+    control: 4
+  - osc_address: "/1/button5"
+    type: "note_on_off"
+    channel: 0
+    control: 5
+  - osc_address: "/1/button6"
+    type: "note_on_off"
+    channel: 0
+    control: 6
+  - osc_address: "/1/button7"
+    type: "note_on_off"
+    channel: 0
+    control: 7
+  - osc_address: "/1/button8"
+    type: "note_on_off"
+    channel: 0
+    control: 8
+  - osc_address: "/1/button9"
+    type: "note_on_off"
+    channel: 0
+    control: 9
+  - osc_address: "/1/button10"
+    type: "note_on_off"
+    channel: 0
+    control: 10
+  - osc_address: "/1/button11"
+    type: "note_on_off"
+    channel: 0
+    control: 11
+  - osc_address: "/1/button12"
+    type: "note_on_off"
+    channel: 0
+    control: 12
+  - osc_address: "/1/button13"
+    type: "note_on_off"
+    channel: 0
+    control: 13
+  - osc_address: "/1/button14"
+    type: "note_on_off"
+    channel: 0
+    control: 14
+  - osc_address: "/tk1/ring/"
+    type: "cc_absolute"
+    channel: 0
+    control: 20
+  = - osc_address: "/tk2/ring/"
+    type: "cc_absolute"
+    channel: 0
+    control: 21
+  - osc_address: "/tk3/ring/"
+    type: "cc_absolute"
+    channel: 0
+    control: 22
+  - osc_address: "/tk1/x/"
+    type: "cc_absolute"
+    channel: 0
+    control: 23
+  - osc_address: "/tk2/x/"
+    type: "cc_absolute"
+    channel: 0
+    control: 24
+  - osc_address: "/tk3/x/"
+    type: "cc_absolute"
+    channel: 0
+    control: 25
+  - osc_address: "/tk1/y/"
+    type: "cc_absolute"
+    channel: 0
+    control: 26
+  - osc_address: "/tk2/y/"
+    type: "cc_absolute"
+    channel: 0
+    control: 27
+  - osc_address: "/tk3/y/"
+    type: "cc_absolute"
+    channel: 0
+    control: 28
+  
+  - osc_address: "/1/knob1"
     type: "cc_relative"
     channel: 0
     control: 61
-  - osc_address: "/tk1/ring/"
-    type: "cc_relative" # Changed from cc_absolute, assuming it's an endless encoder
+  - osc_address: "/1/knob2"
+    type: "cc_relative"
     channel: 0
-    control: 22
-    # value_map is not used for cc_relative
+    control: 62
+  - osc_address: "/1/knob3"
+    type: "cc_relative"
+    channel: 0
+    control: 63
+  - osc_address: "/1/knob4"
+    type: "cc_relative"
+    channel: 0
+    control: 64
+  - osc_address: "/1/knob5"
+    type: "cc_relative"
+    channel: 0
+    control: 65
+  - osc_address: "/1/knob6"
+    type: "cc_relative"
+    channel: 0
+    control: 66
+  - osc_address: "/1/knob7"
+    type: "cc_relative"
+    channel: 0
+    control: 67
+  - osc_address: "/1/knob8"
+    type: "cc_relative"
+    channel: 0
+    control: 68 
+  - osc_address: "/1/knob9" 
+    type: "cc_relative"
+    channel: 0
+    control: 69
+  - osc_address: "/1/knob10"
+    type: "cc_relative"
+    channel: 0
+    control: 70
+  - osc_address: "/1/knob11"
+    type: "cc_relative"
+    channel: 0
+    control: 71
+  - osc_address: "/1/knob12"
+    type: "cc_relative"
+    channel: 0
+    control: 72
