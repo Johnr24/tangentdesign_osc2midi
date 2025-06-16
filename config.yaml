@@ -77,38 +77,83 @@ mappings:
     type: "cc_absolute"
     channel: 0
     control: 20
-  = - osc_address: "/tk2/ring/"
+    value_map:
+      in_min: 0.0
+      in_max: 1.0
+      out_min: 0
+      out_max: 127
+  - osc_address: "/tk2/ring/"
     type: "cc_absolute"
     channel: 0
     control: 21
+    value_map:
+      in_min: 0.0
+      in_max: 1.0
+      out_min: 0
+      out_max: 127
   - osc_address: "/tk3/ring/"
     type: "cc_absolute"
     channel: 0
     control: 22
+    value_map:
+      in_min: 0.0
+      in_max: 1.0
+      out_min: 0
+      out_max: 127
   - osc_address: "/tk1/x/"
     type: "cc_absolute"
     channel: 0
     control: 23
+    value_map:
+      in_min: 0.0
+      in_max: 1.0
+      out_min: 0
+      out_max: 127
   - osc_address: "/tk2/x/"
     type: "cc_absolute"
     channel: 0
     control: 24
+    value_map:
+      in_min: 0.0
+      in_max: 1.0
+      out_min: 0
+      out_max: 127
   - osc_address: "/tk3/x/"
     type: "cc_absolute"
     channel: 0
     control: 25
+    value_map:
+      in_min: 0.0
+      in_max: 1.0
+      out_min: 0
+      out_max: 127
   - osc_address: "/tk1/y/"
     type: "cc_absolute"
     channel: 0
     control: 26
+    value_map:
+      in_min: 0.0
+      in_max: 1.0
+      out_min: 0
+      out_max: 127
   - osc_address: "/tk2/y/"
     type: "cc_absolute"
     channel: 0
     control: 27
+    value_map:
+      in_min: 0.0
+      in_max: 1.0
+      out_min: 0
+      out_max: 127
   - osc_address: "/tk3/y/"
     type: "cc_absolute"
     channel: 0
     control: 28
+    value_map:
+      in_min: 0.0
+      in_max: 1.0
+      out_min: 0
+      out_max: 127
   
   - osc_address: "/1/knob1"
     type: "cc_relative"
