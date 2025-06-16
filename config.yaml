@@ -1,3 +1,20 @@
+# MIDI Mappings for Tangent to MIDI Bridge
+#
+# Each item in this list defines a mapping from an OSC address to a MIDI message.
+#
+# Properties:
+#   osc_address: The OSC path from your controller (e.g., "/tangent/bt/A/press").
+#   type: The type of MIDI message to send.
+#         - "note_on_off": For buttons. Sends a Note On message. The OSC value should be a float (0.0 for off, 1.0 for on).
+#         - "cc_relative": For rotary encoders. Sends a Control Change message, accumulating the value. The OSC value should be an integer delta.
+#         - "cc_absolute": For faders/sliders. Sends a Control Change message with a scaled value. The OSC value should be a float.
+#   channel: The MIDI channel (0-15).
+#   control: The MIDI note number (for "note_on_off") or CC number (for "cc_..." types), from 0-127.
+#   value_map: (Required for "cc_absolute" type only)
+#     in_min: The minimum value from the OSC controller (e.g., 0.0).
+#     in_max: The maximum value from the OSC controller (e.g., 1.0).
+#     out_min: The minimum MIDI value to map to (e.g., 0).
+#     out_max: The maximum MIDI value to map to (e.g., 127).
 
 mappings:
   - osc_address: "/1/button1"
