@@ -203,3 +203,17 @@ mappings:
     type: "cc_relative"
     channel: 0
     control: 72
+
+# Auto-config Templates (uncomment and modify as needed)
+# 
+# Buttons (note_on_off):
+#   - osc_address: "/<panel>/button<index>"
+#     type: "note_on_off"
+#     channel: 0
+#     control: <MIDI note number>
+#
+# Knobs (cc_relative):
+#   - osc_address: "/<panel>/knob<index>"
+#     type: "cc_relative"
+#     channel: 0
+#     control: <MIDI CC number>

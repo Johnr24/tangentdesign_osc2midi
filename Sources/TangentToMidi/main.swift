@@ -167,6 +167,28 @@ let oscServer = OSCServer(
         
         guard let mapping = MIDI_MAPPINGS[address] else {
             print("Received unmapped OSC: \(address) \(arguments)")
+            
+            // Check for button pattern: /<number>/button<number>
+            if address.range(of: #"^/\d+/button\d+$"#, options: .regularExpression) != nil {
+                print("""
+                  Consider adding to config.yaml:
+                    - osc_address: "\(address)"
+                      type: "note_on_off"
+                      channel: 0
+                      control: <MIDI note number>
+                """)
+            }
+            // Check for knob pattern: /<number>/knob<number>
+            else if address.range(of: #"^/\d+/knob\d+$"#, options: .regularExpression) != nil {
+                print("""
+                  Consider adding to config.yaml:
+                    - osc_address: "\(address)"
+                      type: "cc_relative"
+                      channel: 0
+                      control: <MIDI CC number>
+                """)
+            }
+            
             return
         }
         
